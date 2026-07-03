@@ -147,7 +147,9 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    st.title("🗺️ Geo Demand Optimizer")
+    from src.brand import apply_brand, hero
+    apply_brand(st)
+    hero(st, "Geospatial Optimization", "Geo Demand Optimizer", "需要地点と供給拠点を地図上で見せ、割当と容量不足を可視化します。")
     st.caption(
         "需要地点と供給拠点を地図上で可視化し、最近傍貪易割当と容量不足を示すMVP。"
         "データは全て架空（seed固定の合成データ）。"
