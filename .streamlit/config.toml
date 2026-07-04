@@ -1,7 +1,8 @@
+# Portfolio Design System v2 — 共通 Streamlit テーマ（正典: portfolio-plan/brand/config.toml）
 [theme]
 base = "light"
 primaryColor = "#0f766e"
-backgroundColor = "#f8fafc"
+backgroundColor = "#f6f7f9"
 secondaryBackgroundColor = "#ffffff"
-textColor = "#0f172a"
+textColor = "#0d1526"
 font = "sans serif"

@@ -147,16 +147,18 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    from src.brand import apply_brand, hero
+    from src.brand import apply_brand, hero, section, sidebar_header, footer_backlink, show_table
     apply_brand(st)
-    hero(st, "Geospatial Optimization", "Geo Demand Optimizer", "需要地点と供給拠点を地図上で見せ、割当と容量不足を可視化します。")
-    st.caption(
-        "需要地点と供給拠点を地図上で可視化し、最近傍貪易割当と容量不足を示すMVP。"
-        "データは全て架空（seed固定の合成データ）。"
+    hero(
+        st,
+        "GEO OPTIMIZATION",
+        "Geo Demand Optimizer",
+        "需要地点と供給拠点を地図上で可視化し、最近傍貪欲割当と容量不足を示すデモ。",
+        chips=["Python", "folium", "NumPy", "stlite", "geospatial"],
     )
 
     # サイドバー: シナリオと地点数
-    st.sidebar.header("設定")
+    sidebar_header(st, "Geo Demand Optimizer")
     n_demand = st.sidebar.slider(
         "需要地点数", _N_DEMAND_MIN, _N_DEMAND_MAX, _N_DEMAND_DEFAULT, step=2
     )
@@ -186,7 +188,7 @@ def main() -> None:
 
     # Demand Settings タブでスケールを調整 + 再計算ボタン
     with tab_settings:
-        st.subheader("需要設定")
+        section(st, "DEMAND SETTINGS", "需要設定")
         st.markdown(f"**シナリオ**: {sc.name} — {sc.description}")
         st.markdown(f"**需要地点数**: {len(sc.demand_points)}  / **供給拠点数**: {len(sc.facilities)}")
         new_scale = st.slider(
@@ -219,11 +221,11 @@ def main() -> None:
     # Assignment Result タブ
     with tab_assign:
         _kpi_row(result)
-        st.subheader("拠点別サマリ")
+        section(st, "FACILITY SUMMARY", "拠点別サマリ")
         fac_rows = facility_summary(result)
-        st.dataframe(pd.DataFrame(fac_rows), use_container_width=True, hide_index=True)
+        show_table(st, pd.DataFrame(fac_rows))
 
-        st.subheader("需要地点別の割当")
+        section(st, "DEMAND ASSIGNMENT", "需要地点別の割当")
         pt_by_id = {p.id: p for p in points}
         rows = []
         for a in result.assignments:
@@ -246,12 +248,12 @@ def main() -> None:
                     "距離(km)": round(u.nearest_distance_km, 2),
                 }
             )
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        show_table(st, pd.DataFrame(rows))
 
     # Capacity Gap タブ
     with tab_gap:
         _kpi_row(result)
-        st.subheader("容量不足（未割当需要）")
+        section(st, "CAPACITY GAP", "容量不足（未割当需要）")
         if not result.unassigned:
             st.success("全ての需要を割当てました。容量不足はありません。")
         else:
@@ -269,18 +271,18 @@ def main() -> None:
                         "最寄り拠点まで(km)": round(u.nearest_distance_km, 2),
                     }
                 )
-            st.dataframe(pd.DataFrame(gap_rows), use_container_width=True, hide_index=True)
+            show_table(st, pd.DataFrame(gap_rows))
 
-        st.subheader("拠点別 余剰容量")
+        section(st, "SURPLUS CAPACITY", "拠点別 余剰容量")
         surplus_rows = [r for r in facility_summary(result) if r["余剰"] > 0]
         if surplus_rows:
-            st.dataframe(pd.DataFrame(surplus_rows), use_container_width=True, hide_index=True)
+            show_table(st, pd.DataFrame(surplus_rows))
         else:
             st.info("余剰容量のある拠点はありません（全拠点が満杯または容量0）。")
 
     # Scenario Comparison タブ
     with tab_cmp:
-        st.subheader("全シナリオ比較")
+        section(st, "SCENARIO COMPARISON", "全シナリオ比較")
         cmp_rows = []
         for k in keys:
             s = scenarios[k]
@@ -298,11 +300,13 @@ def main() -> None:
                     "平均距離(km)": round(r.avg_distance_km, 2),
                 }
             )
-        st.dataframe(pd.DataFrame(cmp_rows), use_container_width=True, hide_index=True)
+        show_table(st, pd.DataFrame(cmp_rows))
         st.caption(
             "シナリオを切り替えると、未割当・利用率・平均距離が変化します。"
             "ピーク需要では不足が拡大し、拠点追加では不足が解消されることを確認できます。"
         )
+
+    footer_backlink(st, repo="geo-demand-optimizer")
 
 
 if __name__ == "__main__":
